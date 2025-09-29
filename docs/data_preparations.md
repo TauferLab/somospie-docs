@@ -1,14 +1,12 @@
-Data Preparation & Preprocessing
-=================================
+# Data Preparation and Preprocessing
 
-SOMOSPIE supports a variety of preprocessing functions, which allow users to modify custom data before being used by any [machine learning algorithms](soil_moisture_predictions.md). Once the data has been installed, it should be preprocessed using the following methods. 
+SOMOSPIE supports a variety of preprocessing functions, which allow users to modify custom data before being used by [machine learning algorithms](./soil_moisture_predictions.md). Once the data has been downloaded, it should be preprocessed using the following methods. 
 
 !!! note
-
     - All preprocessing methods are found within the directory `SOMOSPIE/code/preprocessing/`. 
-    - The [Data Guide](data_guide.md) elaborates on the data necessary for SOMOSPIE, in case of confusion.
+    - The [Data Guide](./data_guide.md) elaborates on the data necessary for SOMOSPIE.
     - The data must be downloaded. This guide assumes data is within a directory located at `SOMOSPIE/data`.
-        - See the "Data Fetching" section of [Additional Features](additional_features.md) for a guide on fetching data.
+    - See the "Data Fetching" section of [Additional Features](./additional_features.md) for a guide on how to fetch data.
 
 ## Preparing Soil Moisture Data
 Soil moisture data should be obtained from the European Space Agency Climate Change Initiative (ESA-CCI) soil moisture dataset. This dataset captures the available soil moisture at a 27km x 27km resolution for the entire world, allowing for accurate reading of the data for a specified year; however, some gaps may appear due to various factors. The data is formatted as a NetCDF (.nc) file for each day for a specified year. 
@@ -25,17 +23,17 @@ Once downloaded, the data can be preprocessed from daily soil moisture data into
 | X12    | Soil moisture average for December         | 0.349     |
 *Table 1: example results of extract_SM_monthly.R*
 
-The data will be available in an .rds format, which will eventually be converted into a .csv with added terrain parameters. 
+The data will be available in an .rds format, which is eventually be converted into a .csv file with added terrain parameters. 
 
-**Example**:
+**Example Command**:
 ```bash
 ./extract_SM_monthly.R 2017
 ```
 
 ## Preparing Terrain Parameters
 
-### Obtaining Terrain Parameters
-Terrain parameters can be obtained in two ways: GEOtiled or HydroShare. GeoTiled is an open-source software that efficiently generates terrain parameters from Digital Elevation Models (DEMs). For more information on generating terrain parameters using GEOtiled, please visit [GEOtiled](https://globalcomputing.group/GEOtiled/).
+### Accessing Terrain Parameters Data
+Terrain parameters can be obtained in two ways: GEOtiled or HydroShare. GEOtiled is an open-source software that efficiently generates terrain parameters from Digital Elevation Models (DEMs). For more information on generating terrain parameters using GEOtiled, please visit [GEOtiled](https://globalcomputing.group/GEOtiled/).
 
 HydroShare contains a dataset "Explanatory Variables and DEMs," whose columns describe the following terrain parameters, all of which can be used within SOMOSPIE.
 
@@ -58,40 +56,44 @@ HydroShare contains a dataset "Explanatory Variables and DEMs," whose columns de
 | Topographic Wetness Index   | Indicator of likelihood of saturated soil during rain events and sediment/matter accumulation                                     | Adimensional             |
 *Table 2: acceptable terrain features accepted from HydroShare*
 
-## Coarisfying Parameters [Optional]
+## Coarsifying Terrain Parameters [Optional]
+
 With terrain parameters downloaded, an optional step is to coarsen the parameters, which will ultimately result in quicker soil moisture predictions at the cost of resolution. The resolution can be coarsened by an integer factor greater than 1. This is not a necessary step, as the data can be used at its native resolution. The script `coarsify.R` coarsens the resolution through the command: `./coarsify.R [input_file] [output_file] [aggregation_factor]`. 
 
-**Example**: Scale the resolution by a factor of 5
+**Example Command**:
+Scaling the resolution by a factor of 5
 ```bash
 ./coarsify.R topo.tif coarse_topo.tif 5
 ```
 
-### Reprojecting the raster
-Although the terrain parameters are obtained, they might not be in a usable format for SOMOSPIE. The raster file with the terrain parameters should be standardized to the WGS84 format, which uses the geographic coordinate system (longitude/latitude). The file may already be in this format, but for safety, it is recommended to reproject the raster to ensure compatibility. 
+### Reprojecting the Raster Data
+
+The raster file including the terrain parameters should be standardized to the WGS84 format, which uses the geographic coordinate system (longitude/latitude). The file may already be in this format, but for safety, it is recommended to reproject the raster to ensure compatibility. 
 
 To reproject the raster, run `./reproject_raster.R [Input_files] [Output_files]` in the command line.
 
-**Example**:
+**Example Command**:
 ```bash
 ./reproject_raster.R ../data/topo_predictors/${topo}.tif ../data/topo_predictors/${topo}.tif`. 
 ```
 
 !!! warning
 
-    `reproject_raster.R` is currently depricated; the required R library PlotKML is depricated. 
+    `reproject_raster.R` is currently deprecated; the required R library PlotKML is deprecated. 
 
-### Stacking the Rasters
+### Stacking the Raster Data
+
 The terrain parameters come as multiple raster files that describe each terrain parameter. These features need to be combined into a single file that encapsulates all features into a raster format. Merging the files into a single file is performed through a raster stack, which stacks the terrain parameters into a single raster. 
 
 To make the raster stack, run the command `./make_raster_stack.R [output_directory] [input_files]`.
 
-**Example**:
+**Example Command**:
 ```bash
 ./make_raster_stack.R ./topo_predictors/ ./data/topo15_CONUS_1km.tif Analytical_Hillshading.tif Aspect.tif 
 ```
 
 ## Preparing Ecoregions
-### Creating Ecoregion shape
+### Creating Ecoregion Shape
 Ecoregions can be obtained from the [Commission for Environmental Cooperation (CEC) website](https://www.cec.org/north-american-environmental-atlas/terrestrial-ecoregions-level-iii/). They should be downloaded as a shapefile. Other options for ecoregion preparation include states and boxes. These ecoregions must be converted to an .rds shape file through `create_shape.R` before proceeding. To create this .rds file, run:`./create_shape.R [region_type] [region] [output_path]`.
 
 **Example 1**: Using the state of Arizona
@@ -109,34 +111,33 @@ Ecoregions can be obtained from the [Commission for Environmental Cooperation (C
 
 ## Creating the Final Dataset
 ### Merging Soil Moisture and Terrain Parameters
+
 With the prepared soil moisture stack and terrain parameters stack, the two files can be combined into one .csv file for training. Combining the files is done through the R script `add_topos.R`. The script can be run through the command line using:
 ```
 ./add_topos.R [soil_moisture_file] [covariates_stack_file] [output_file] [terrain_parameters (optional)]
 ```
-**Example**: 
+**Example Command**: 
 ```bash
 ./add_topos.R soil_moisture.rds cov.tif prepared_data.csv SLOPE ASPECT HILLSHADING
 ```
 ### Cropping to Ecoregion
-While the prepared .csv could technically run, it is essential to crop data to the region of interest defined by the ecoregions. Doing so results in substantial speedups for SOMOSPIE and requires significantly less memory than working on a large, uncropped area. Cropping the prepared data is done through the `crop_to_shape.R` script, using the previously created shapefile. It accepts the prepared dataset, along with the prepared ecoregion shape as parameters.
 
-**Example**:
+It is recommended to crop data to the region of interest defined by the ecoregions. Doing so results in substantial speedups for SOMOSPIE and requires significantly less memory than working on a large, uncropped area. Cropping the prepared data is done through the `crop_to_shape.R` script, using the previously created shapefile. It accepts the prepared dataset, along with the prepared ecoregion shape as parameters.
+
+**Example Command**:
 ```bash
 ./crop_to_shape.R prepared_data.csv ./data/shapes/CEC_10_2_4.rds prepared_data_cropped.csv
 ```
 
-## Example Prepared Dataset
-train.csv for State of Oklahoma:
+## Example of the Final Dataset
 
-| index | x        | y      | z           | elevation | aspect      | slope       |
+Below is a generated train.csv file for the state of Oklahoma:
+
+| Index | Longitude| Latitude|Soil Moisture| Elevation | Aspect     | Slope       |
 | ----- | -------- | ------ | ----------- | --------- | ----------- | ----------- |
 | 0     | -101.375 | 37.125 | 0.112136401 | 960       | 1.435353398 | 0.002797498 |
 | 1     | -101.125 | 37.125 | 0.160304278 | 911       | 1.291842222 | 0.002738319 |
 | 2     | -100.875 | 37.125 | 0.184895456 | 863       | 1.106565714 | 0.004054314 |
 | ...   | ...      | ...    | ...         | ...       | ...         | ...         |
 | 450   | -94.125  | 33.625 | 0.348578483 | 91        | 4.439002514 | 0.004484821 |
-*Table 3: prepared dataset*
-
-!!! info ""
-
-    Note: X is longitude, y is latitude, and z is soil moisture values. 
+*Table 3: prepared dataset* 

@@ -58,9 +58,9 @@ nav:
   - Home: index.md
   - Installation: installation.md
   - Data Guide: data_guide.md
-  - Data Preprocessing: data_preparations.md
+  - Data Preparation and Preprocessing: data_preparations.md
   - Machine Learning Algorithms: soil_moisture_predictions.md
-  - Other Features: additional_features.md
+  - Additional Features: additional_features.md
   - Research:
       - Publications: Research/publications.md
       - Acknowledgements: Research/acknowledgements.md
