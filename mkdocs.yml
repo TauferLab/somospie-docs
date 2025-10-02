@@ -1,5 +1,5 @@
 site_name: SOMOSPIE Documentation
-repo_url: https://github.com/TauferLab/somospie-docs
+repo_url: https://github.com/TauferLab/SOMOSPIE
 theme:
   name: material
   logo: assets/logo_white.png
