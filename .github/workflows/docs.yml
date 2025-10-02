@@ -6,7 +6,7 @@ on:
       - "docs/**"
       - "mkdocs.yml"
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
